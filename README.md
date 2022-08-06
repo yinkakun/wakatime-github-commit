@@ -6,15 +6,11 @@ Auto commit your daily total time tracked on Wakatime to Github. Using Netlify S
 
 1. Fork this repository.
 
-2. You'll need a [WakaTime API Key](https://wakatime.com/settings/api-key), which you can get from your WakaTime Account Settings.
+2. You'll need a [WakaTime API Key](https://wakatime.com/settings/api-key), which you can get from your WakaTime Account Settings. Store the token somewhere secure, we'll need it shortly.
 
-3. You'll need a GitHub Personal Access Token with `repo` and `admin:repo_hook` scope which can be generated [here](https://github.com/settings/tokens).
+3. You'll need a GitHub Personal Access Token with `repo` and `admin:repo_hook` scope which can be generated [here](https://github.com/settings/tokens). Store the token somewhere secure, we'll need it shortly.
 
-4. This project uses Netlify [Scheduled Functions](https://ntl.fyi/sched-func) which is currently a beta feature, so you'll need to enable it in [Netlify Labs.](https://app.netlify.com/user/labs) Once you open the Netlify Labs page, click on Enable next to the Scheduled Functions experimental feature.
-
-5. If you don’t already have a Netlify account, you can sign up [here](https://app.netlify.com/signup). Once you've logged in,go to the [Netlify Dashboard](https://app.netlify.com). Click the `Add New Site` > `Import An Existing Project` > `GitHub` button. Authorize the app to access your GitHub account then choose the cloned repo.
-
-6. Add required environment variables, Click the `Show Advanced` > `New Variable` button. Add these variables:
+4. Import Repo to Netlify - Go to the [Netlify Dashboard page](https://app.netlify.com), Click the `Add New Site` > `Import An Existing Project` > `GitHub` button. Authorize the app to access your GitHub account then choose the cloned repo. Add required environment variables, Click the `Show Advanced` > `New Variable` button. Add these variables:
 
 ```env
 WAKATIME_API_KEY=<your-wakatime-api-key>
@@ -23,7 +19,7 @@ REPO_NAME=<the-cloned-repo-name>
 GITHUB_USERNAME=<your-github-username>
 ```
 
-7. Then click the `Deploy Site` button. Go to the `Functions` tab of the dashboard and click the `Enable Scheduled Functions` button. After a few seconds, your function should be successfully deployed.
+Then click the `Deploy Site` button. Go to the `Functions` tab of the dashboard and click the `Enable Scheduled Functions` button. After a few seconds, your function should be successfully deployed.
 
 ## Local Development
 
@@ -50,5 +46,4 @@ tsc --noEmit
 
 TODO
 
-- Tidy up functions
 - Filter duplicate dates
