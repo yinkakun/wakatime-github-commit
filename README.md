@@ -12,7 +12,18 @@ Auto commit your daily total time tracked on Wakatime to Github. Using Netlify S
 
 4. This project uses Netlify [Scheduled Functions](https://ntl.fyi/sched-func) which is currently a beta feature, so you'll need to enable it in [Netlify Labs.](https://app.netlify.com/user/labs) Once you open the Netlify Labs page, click on Enable next to the Scheduled Functions experimental feature.
 
-5. If you don’t already have a Netlify account, you can sign up [here](https://app.netlify.com/signup). Once you've logged in,go to the [Netlify Dashboard](https://app.netlify.com). Click the Add A New Project button.
+5. If you don’t already have a Netlify account, you can sign up [here](https://app.netlify.com/signup). Once you've logged in,go to the [Netlify Dashboard](https://app.netlify.com). Click the `Add New Site` > `Import An Existing Project` > `GitHub` button. Authorize the app to access your GitHub account then choose the cloned repo.
+
+6. Add required environment variables, Click the `Show Advanced` > `New Variable` button. Add these variables:
+
+```env
+WAKATIME_API_KEY=<your-wakatime-api-key>
+GITHUB_ACCESS_TOKEN=<your-github-access-token>
+REPO_NAME=<the-cloned-repo-name>
+GITHUB_USERNAME=<your-github-username>
+```
+
+7. Then click the `Deploy Site` button. Go to the `Functions` tab of the dashboard and click the `Enable Scheduled Functions` button. After a few seconds, your function should be successfully deployed.
 
 ## Local Development
 
@@ -40,4 +51,4 @@ tsc --noEmit
 TODO
 
 - Tidy up functions
-- Proper error handling and http responses
+- Filter duplicate dates
