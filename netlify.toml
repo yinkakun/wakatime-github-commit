@@ -1,5 +1,6 @@
 [functions]
   directory="functions"
+   included_files = ["time-tracked.json"]
 
 [functions."log-tracked-time"]
   schedule = "55 23 * * *"
