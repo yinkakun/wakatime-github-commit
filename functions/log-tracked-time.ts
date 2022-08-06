@@ -199,6 +199,9 @@ const handler = async (event: HandlerEvent) => {
     return {
       statusCode: 500,
       headers: httpHeaders,
+      body: JSON.stringify({
+        error: err,
+      }),
     };
   }
 };
