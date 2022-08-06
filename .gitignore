@@ -29,3 +29,7 @@ build/
 .DS_Store
 # Local Netlify folder
 .netlify
+
+# env
+.env
+.env.development
