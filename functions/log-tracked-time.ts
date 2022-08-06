@@ -105,8 +105,8 @@ const formatDuration = ({ hrs, mins }: ITotalDuration) => {
 };
 
 const httpHeaders = {
-  'Content-Type': 'application/json',
   'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type',
 };
 
 const handler = async (event: HandlerEvent) => {
