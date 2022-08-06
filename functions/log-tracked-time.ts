@@ -152,8 +152,7 @@ const handler = async (event: HandlerEvent) => {
       duration: formattedDuration,
     };
 
-    const timeTrackedFile = path.join(process.cwd(), TIME_TRACKED_FILE_PATH);
-    const oldTimeTracked = readFileSync(timeTrackedFile, 'utf8');
+    const oldTimeTracked = readFileSync(`./${TIME_TRACKED_FILE_PATH}`, 'utf8');
 
     const totalTimeTracked = [...JSON.parse(oldTimeTracked), newTimeTracked];
 
