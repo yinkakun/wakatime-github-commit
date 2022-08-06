@@ -183,7 +183,6 @@ const handler = async (event: HandlerEvent) => {
     );
 
     const commitUrl = createCommit.createCommitOnBranch.commit.url;
-    console.log('commit url', commitUrl);
 
     return {
       statusCode: 200,
@@ -193,7 +192,6 @@ const handler = async (event: HandlerEvent) => {
       }),
     };
   } catch (err) {
-    console.error(err);
     return {
       statusCode: 500,
       headers: httpHeaders,
