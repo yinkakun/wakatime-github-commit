@@ -1,6 +1,5 @@
 require('dotenv').config();
 import { readFileSync } from 'fs';
-const path = require('path');
 import { WakaTimeClient } from 'wakatime-client';
 import { GraphQLClient, gql } from 'graphql-request';
 import { format, intervalToDuration } from 'date-fns';
