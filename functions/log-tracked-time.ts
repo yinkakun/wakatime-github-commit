@@ -1,7 +1,10 @@
+require('dotenv').config();
 import { readFileSync } from 'fs';
+const path = require('path');
 import { WakaTimeClient } from 'wakatime-client';
 import { GraphQLClient, gql } from 'graphql-request';
 import { format, intervalToDuration } from 'date-fns';
+import { HandlerEvent } from '@netlify/functions';
 
 const TODAY_DATE = new Date();
 const REPO_NAME = process.env.REPO_NAME;
@@ -101,71 +104,103 @@ const formatDuration = ({ hrs, mins }: ITotalDuration) => {
   return `${hrs} ${pluralizeHrs(hrs)}, ${mins} ${pluralizeMins(mins)}`;
 };
 
-const handler = async () => {
-  const durations: IDuration = await wakatimeClient.getMyDurations({
-    date: TODAY_DATE,
-  });
+const httpHeaders = {
+  'Content-Type': 'application/json',
+  'Access-Control-Allow-Origin': '*',
+};
 
-  const totalDurationInSeconds = durations.data.reduce(
-    (accumulatedValue, currentValue) =>
-      accumulatedValue + currentValue.duration,
-    0,
-  );
+const handler = async (event: HandlerEvent) => {
+  if (event.httpMethod == 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers: httpHeaders,
+    };
+  }
 
-  const formattedTotalDuration = intervalToDuration({
-    start: 0,
-    end: totalDurationInSeconds * 1000,
-  });
+  if (event.httpMethod !== 'GET') {
+    return {
+      statusCode: 405,
+      headers: httpHeaders,
+    };
+  }
 
-  const formattedTodayDate = format(TODAY_DATE, 'PPPP');
+  try {
+    const durations: IDuration = await wakatimeClient.getMyDurations({
+      date: TODAY_DATE,
+    });
 
-  const formattedDuration = formatDuration({
-    hrs: formattedTotalDuration.hours || 0,
-    mins: formattedTotalDuration.minutes || 0,
-  });
+    const totalDurationInSeconds = durations.data.reduce(
+      (accumulatedValue, currentValue) =>
+        accumulatedValue + currentValue.duration,
+      0,
+    );
 
-  const newTimeTracked = {
-    date: formattedTodayDate,
-    duration: formattedDuration,
-  };
+    const formattedTotalDuration = intervalToDuration({
+      start: 0,
+      end: totalDurationInSeconds * 1000,
+    });
 
-  const oldTimeTracked = readFileSync(TIME_TRACKED_FILE_PATH, 'utf8');
+    const formattedTodayDate = format(TODAY_DATE, 'PPPP');
 
-  const totalTimeTracked = [...JSON.parse(oldTimeTracked), newTimeTracked];
+    const formattedDuration = formatDuration({
+      hrs: formattedTotalDuration.hours || 0,
+      mins: formattedTotalDuration.minutes || 0,
+    });
 
-  const encodeBase64 = (str: string) => Buffer.from(str).toString('base64');
+    const newTimeTracked = {
+      date: formattedTodayDate,
+      duration: formattedDuration,
+    };
 
-  const repoInfoVariables = {
-    owner: GITHUB_USERNAME,
-    repo: REPO_NAME,
-  };
+    const timeTrackedFile = path.join(process.cwd(), TIME_TRACKED_FILE_PATH);
+    const oldTimeTracked = readFileSync(timeTrackedFile, 'utf8');
 
-  const repo = await githubClient.request(repoInfoQuery, repoInfoVariables);
+    const totalTimeTracked = [...JSON.parse(oldTimeTracked), newTimeTracked];
 
-  const branchName = repo.repository.defaultBranchRef.name;
-  const headOid = repo.repository.defaultBranchRef.target.history.nodes[0].oid;
+    const encodeBase64 = (str: string) => Buffer.from(str).toString('base64');
 
-  const createCommitMutationVariables = {
-    branchName: branchName,
-    expectedHeadOid: headOid,
-    filePath: TIME_TRACKED_FILE_PATH,
-    repoNameWithOwner: `${GITHUB_USERNAME}/${REPO_NAME}`,
-    commitMessage: `update with time tracked for ${formattedTodayDate}`,
-    encodedContent: encodeBase64(JSON.stringify(totalTimeTracked, null, 2)),
-  };
+    const repoInfoVariables = {
+      owner: GITHUB_USERNAME,
+      repo: REPO_NAME,
+    };
 
-  const createCommit = await githubClient.request(
-    createCommitMutation,
-    createCommitMutationVariables,
-  );
+    const repo = await githubClient.request(repoInfoQuery, repoInfoVariables);
 
-  const commitUrl = createCommit.createCommitOnBranch.commit.url;
-  console.log('COMMIT URL:', commitUrl);
+    const branchName = repo.repository.defaultBranchRef.name;
+    const headOid =
+      repo.repository.defaultBranchRef.target.history.nodes[0].oid;
 
-  return {
-    status: 200,
-    commitUrl,
-  };
+    const createCommitMutationVariables = {
+      branchName: branchName,
+      expectedHeadOid: headOid,
+      filePath: TIME_TRACKED_FILE_PATH,
+      repoNameWithOwner: `${GITHUB_USERNAME}/${REPO_NAME}`,
+      commitMessage: `update with time tracked for ${formattedTodayDate}`,
+      encodedContent: encodeBase64(JSON.stringify(totalTimeTracked, null, 2)),
+    };
+
+    const createCommit = await githubClient.request(
+      createCommitMutation,
+      createCommitMutationVariables,
+    );
+
+    const commitUrl = createCommit.createCommitOnBranch.commit.url;
+    console.log('commit url', commitUrl);
+
+    return {
+      statusCode: 200,
+      headers: httpHeaders,
+      body: JSON.stringify({
+        commitUrl: commitUrl,
+      }),
+    };
+  } catch (err) {
+    console.error(err);
+    return {
+      statusCode: 500,
+      headers: httpHeaders,
+    };
+  }
 };
 
 export { handler };
