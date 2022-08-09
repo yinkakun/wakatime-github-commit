@@ -116,13 +116,6 @@ const handler = async (event: HandlerEvent) => {
     };
   }
 
-  if (event.httpMethod !== 'GET') {
-    return {
-      statusCode: 405,
-      headers: httpHeaders,
-    };
-  }
-
   try {
     const durations: IDuration = await wakatimeClient.getMyDurations({
       date: TODAY_DATE,
